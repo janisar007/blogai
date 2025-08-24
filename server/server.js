@@ -13,6 +13,7 @@ import serviceAccountKey from "./blogio-42f85-firebase-adminsdk-fbsvc-aa9314159d
 import { getAuth } from "firebase-admin/auth";
 
 import User from "./Schema/User.js";
+import blogRouter from "./Routers/blog.router.js";
 
 
 const server = express();
@@ -256,6 +257,8 @@ server.post("/google-auth", async (req, res) => {
         });
     });
 });
+
+server.use("", blogRouter);
 
 server.listen(PORT, () => {
   console.log("listening on port -> " + PORT);

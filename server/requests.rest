@@ -1,2 +1,2 @@
 
-GET http://localhost:5000/get-upload-url 
+POST http://localhost:5000/create-blog 

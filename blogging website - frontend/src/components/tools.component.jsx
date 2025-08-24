@@ -7,8 +7,11 @@ import Header from "@editorjs/header";
 import Quote from "@editorjs/quote";
 import Marker from "@editorjs/marker";
 import InlineCode from "@editorjs/inline-code";
-import Code from "@editorjs/code";
+import CodeTool from "@editorjs/code";
 import axios from "axios";
+
+import CodeBox from "@bomdi/codebox";
+import "highlight.js/styles/github-dark.css"; // pick any theme
 
 const uploadImageByURl = (e) => {
   let link = new Promise((resolve, reject) => {
@@ -84,5 +87,12 @@ export const tools = {
   },
   marker: Marker,
   inlineCode: InlineCode,
-  code: Code,
+  codeBox: {
+    class: CodeBox,
+    config: {
+      themeURL: "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css",
+      themeName: "night-owl",
+      useDefaultTheme: "light", // fallback
+    },
+  },
 };
