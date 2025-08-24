@@ -70,13 +70,21 @@ const Homepage = () => {
     setPageState(category);
   };
 
-  const fetchBlogsByCategory = () => {
+  const fetchBlogsByCategory = ({page = 1}) => {
     axios
       .post(import.meta.env.VITE_SERVER_DOMAIN + "/search-blogs", {
-        tags: pageState,
+        tag: pageState,
+        page
       })
-      .then(({ data }) => {
-        setBlogs(data.blogs);
+      .then(async ({ data }) => {
+        let formatedData = await filterPaginationData({
+            state: blogs,
+            data: data.blogs,
+            page,
+            countRoute: "/search-blogs-count",
+            data_to_send: {tag: pageState}
+        })
+        setBlogs(formatedData);
       })
       .catch((err) => {
         console.log(err);
@@ -89,7 +97,7 @@ const Homepage = () => {
     if (pageState == "home") {
       fetchLatestBlogs({page: 1});
     } else {
-      fetchBlogsByCategory();
+      fetchBlogsByCategory({page: 1});
     }
 
     if (!trendingBlogs) {
@@ -126,7 +134,7 @@ const Homepage = () => {
                 <NoDataMessage message="No Blog Published" />
               )}
 
-              <LoadMoreDataBtn state={blogs} fetchDataFun={fetchLatestBlogs}/>
+              <LoadMoreDataBtn state={blogs} fetchDataFun={(pageState == "home" ? fetchLatestBlogs : fetchBlogsByCategory)}/>
             </>
             <>
               {trendingBlogs == null ? (

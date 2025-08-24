@@ -139,9 +139,9 @@ export const trendingBlog = async (req, res) => {
 
 export const searchBlog = (req, res) => {
 
-    let { tags } = req.body;
+    let { tag, page } = req.body;
 
-    let findQuery = {tags: tags, draft: false};
+    let findQuery = {tags: tag, draft: false};
 
     let maxLimit = 5;
 
@@ -152,6 +152,7 @@ export const searchBlog = (req, res) => {
       )
       .sort({ publishedAt: -1 })
       .select("blog_id title des banner activity tags publishedAt -_id")
+      .skip((page-1) * maxLimit)
       .limit(maxLimit)
       .then((blogs) => {
         return res.status(200).json({ blogs });
@@ -165,6 +166,23 @@ export const searchBlog = (req, res) => {
 export const allLatestBlogsCount = (req, res) => {
 
     blogModel.countDocuments({draft: false})
+    .then(count => {
+        return res.status(200).json({totalDocs: count})
+    })
+    .catch(err => {
+        console.log(err)
+        return res.status(500).json({error: err.message})
+    })
+
+}
+
+export const searchBlogCount = (req, res) => {
+
+    let { tag } = req.body;
+
+    let findQuery = {tags: tag, draft: false};
+
+    blogModel.countDocuments(findQuery)
     .then(count => {
         return res.status(200).json({totalDocs: count})
     })
