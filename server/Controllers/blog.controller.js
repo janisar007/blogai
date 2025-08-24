@@ -86,8 +86,7 @@ export const createBlog = async (req, res) => {
 
 export const latestBlog = async (req, res) => {
   try {
-
-    let {page} = req.body;
+    let { page } = req.body;
     let maxLimit = 5;
 
     blogModel
@@ -138,57 +137,66 @@ export const trendingBlog = async (req, res) => {
 };
 
 export const searchBlog = (req, res) => {
+  let { tag, query, page } = req.body;
 
-    let { tag, page } = req.body;
+  let findQuery;
 
-    let findQuery = {tags: tag, draft: false};
+  if (tag) {
+    findQuery = { tags: tag, draft: false };
+  } else if (query) {
+    findQuery = { draft: false, title: new RegExp(query, "i") };
+  }
 
-    let maxLimit = 5;
+  let maxLimit = 5;
 
-    blogModel.find(findQuery)
+  blogModel
+    .find(findQuery)
     .populate(
-        "author",
-        "personal_info.profile_img personal_info.username personal_info.fullname -_id"
-      )
-      .sort({ publishedAt: -1 })
-      .select("blog_id title des banner activity tags publishedAt -_id")
-      .skip((page-1) * maxLimit)
-      .limit(maxLimit)
-      .then((blogs) => {
-        return res.status(200).json({ blogs });
-      })
-      .catch((err) => {
-        return res.status(500).json({ error: err.message });
-      });
-
-}
+      "author",
+      "personal_info.profile_img personal_info.username personal_info.fullname -_id"
+    )
+    .sort({ publishedAt: -1 })
+    .select("blog_id title des banner activity tags publishedAt -_id")
+    .skip((page - 1) * maxLimit)
+    .limit(maxLimit)
+    .then((blogs) => {
+      return res.status(200).json({ blogs });
+    })
+    .catch((err) => {
+      return res.status(500).json({ error: err.message });
+    });
+};
 
 export const allLatestBlogsCount = (req, res) => {
-
-    blogModel.countDocuments({draft: false})
-    .then(count => {
-        return res.status(200).json({totalDocs: count})
+  blogModel
+    .countDocuments({ draft: false })
+    .then((count) => {
+      return res.status(200).json({ totalDocs: count });
     })
-    .catch(err => {
-        console.log(err)
-        return res.status(500).json({error: err.message})
-    })
-
-}
+    .catch((err) => {
+      console.log(err);
+      return res.status(500).json({ error: err.message });
+    });
+};
 
 export const searchBlogCount = (req, res) => {
+  let { tag, query } = req.body;
 
-    let { tag } = req.body;
+  let findQuery;
 
-    let findQuery = {tags: tag, draft: false};
+  if (tag) {
+    findQuery = { tags: tag, draft: false };
+  } else if (query) {
+    findQuery = { draft: false, title: new RegExp(query, "i") };
+  }
 
-    blogModel.countDocuments(findQuery)
-    .then(count => {
-        return res.status(200).json({totalDocs: count})
+  blogModel
+    .countDocuments(findQuery)
+    .then((count) => {
+      return res.status(200).json({ totalDocs: count });
     })
-    .catch(err => {
-        console.log(err)
-        return res.status(500).json({error: err.message})
-    })
-
-}
+    .catch((err) => {
+      console.log(err);
+      return res.status(500).json({ error: err.message });
+    });
+};

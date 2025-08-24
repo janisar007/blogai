@@ -14,6 +14,7 @@ import { getAuth } from "firebase-admin/auth";
 
 import User from "./Schema/User.js";
 import blogRouter from "./Routers/blog.router.js";
+import usersRouter from "./Routers/user.router.js";
 
 
 const server = express();
@@ -259,6 +260,7 @@ server.post("/google-auth", async (req, res) => {
 });
 
 server.use("", blogRouter);
+server.use("", usersRouter);
 
 server.listen(PORT, () => {
   console.log("listening on port -> " + PORT);
