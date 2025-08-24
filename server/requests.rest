@@ -1,2 +1,2 @@
 
-POST http://localhost:5000/create-blog 
+GET http://localhost:5000/trending-blogs
