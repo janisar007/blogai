@@ -137,7 +137,7 @@ export const trendingBlog = async (req, res) => {
 };
 
 export const searchBlog = (req, res) => {
-  let { tag, query, page } = req.body;
+  let { tag, query, page, author } = req.body;
 
   let findQuery;
 
@@ -145,6 +145,8 @@ export const searchBlog = (req, res) => {
     findQuery = { tags: tag, draft: false };
   } else if (query) {
     findQuery = { draft: false, title: new RegExp(query, "i") };
+  } else if(author) {
+    findQuery = {author, draft: false};
   }
 
   let maxLimit = 5;
@@ -180,7 +182,7 @@ export const allLatestBlogsCount = (req, res) => {
 };
 
 export const searchBlogCount = (req, res) => {
-  let { tag, query } = req.body;
+  let { tag, query, author } = req.body;
 
   let findQuery;
 
@@ -188,6 +190,8 @@ export const searchBlogCount = (req, res) => {
     findQuery = { tags: tag, draft: false };
   } else if (query) {
     findQuery = { draft: false, title: new RegExp(query, "i") };
+  } else if(author) {
+    findQuery = {author, draft: false};
   }
 
   blogModel
