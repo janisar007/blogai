@@ -6,7 +6,7 @@ export const createBlog = async (req, res) => {
   try {
     let authorId = req.user;
 
-    let { title, banner, content, tags, des, draft } = req.body;
+    let { title, banner, content, tags, des, draft, id } = req.body;
 
     if (!title) {
       return res.status(403).json({ error: "You must provide title!" });
@@ -39,46 +39,59 @@ export const createBlog = async (req, res) => {
     tags = tags.map((tag) => tag.toLowerCase());
 
     let blog_id =
+      id ||
       title
         .replace(/[^a-zA-Z0-9]/g, " ")
         .replace(/\s+/g, "-")
         .trim() + nanoid();
 
-    let blog = new blogModel({
-      title,
-      des,
-      banner,
-      content,
-      tags,
-      author: authorId,
-      blog_id,
-      draft: Boolean(draft),
-    });
+    if (id) {
 
-    blog
-      .save()
-      .then((blog) => {
-        let incrementVal = draft ? 0 : 1;
+        blogModel.findOneAndUpdate({blog_id}, {title, des, banner, content, tags, draft : draft ? draft : false})
+        .then(() => {
+            return res.status(200).json({id: blog_id})
+        })
+        .catch(err => {
+            return res.status(500).json({ error: "Failed to update total posts number" });
 
-        User.findOneAndUpdate(
-          { _id: authorId },
-          {
-            $inc: { "account_info.total_posts": incrementVal },
-            $push: { blogs: blog._id },
-          }
-        )
-          .then((user) => {
-            return res.status(200).json({ id: blog.blog_id });
-          })
-          .catch((err) => {
-            res
-              .status(500)
-              .json({ error: "Failed to update total posts number" });
-          });
-      })
-      .catch((err) => {
-        return res.status(500).json({ error: err.message });
+        })
+    } else {
+      let blog = new blogModel({
+        title,
+        des,
+        banner,
+        content,
+        tags,
+        author: authorId,
+        blog_id,
+        draft: Boolean(draft),
       });
+
+      blog
+        .save()
+        .then((blog) => {
+          let incrementVal = draft ? 0 : 1;
+
+          User.findOneAndUpdate(
+            { _id: authorId },
+            {
+              $inc: { "account_info.total_posts": incrementVal },
+              $push: { blogs: blog._id },
+            }
+          )
+            .then((user) => {
+              return res.status(200).json({ id: blog.blog_id });
+            })
+            .catch((err) => {
+              res
+                .status(500)
+                .json({ error: "Failed to update total posts number" });
+            });
+        })
+        .catch((err) => {
+          return res.status(500).json({ error: err.message });
+        });
+    }
   } catch (error) {
     return res.status(500).json({ erro: "Internal server error" });
   }
@@ -142,7 +155,7 @@ export const searchBlog = (req, res) => {
   let findQuery;
 
   if (tag) {
-    findQuery = { tags: tag, draft: false, blog_id: {$ne: eliminate_blog} };
+    findQuery = { tags: tag, draft: false, blog_id: { $ne: eliminate_blog } };
   } else if (query) {
     findQuery = { draft: false, title: new RegExp(query, "i") };
   } else if (author) {
@@ -206,9 +219,9 @@ export const searchBlogCount = (req, res) => {
 };
 
 export const getBlog = (req, res) => {
-  let { blog_id } = req.body;
+  let { blog_id, draft, mode } = req.body;
 
-  let incrementVal = 1;
+  let incrementVal = mode != "edit" ? 1 : 0;
 
   blogModel
     .findOneAndUpdate(
@@ -230,6 +243,12 @@ export const getBlog = (req, res) => {
         console.log(err);
         return res.status(500).json({ error: err.message });
       });
+
+      if (blog.draft && !draft) {
+        return res
+          .status(500)
+          .json({ error: "You can not access draft blog!" });
+      }
 
       return res.status(200).json({ blog });
     })

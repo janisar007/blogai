@@ -1,5 +1,5 @@
 import React, { useContext, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 
 import { Toaster, toast } from "react-hot-toast";
 
@@ -22,6 +22,8 @@ const BlogEditor = () => {
     setEditorState,
   } = useContext(EditorContext);
 
+  let {blog_id} = useParams();
+
   let {
     userAuth: { access_token },
   } = useContext(UserContext);
@@ -32,7 +34,7 @@ const BlogEditor = () => {
       setTextEditor(
         new EditorJS({
           holder: "textEditor",
-          data: content,
+          data: Array.isArray(content) ? content[0] : content,
           tools: tools,
           placeholder: "Let's write your imagination",
         })
@@ -142,7 +144,7 @@ const BlogEditor = () => {
           draft: true,
         };
         axios
-          .post(import.meta.env.VITE_SERVER_DOMAIN + "/create-blog", blogObj, {
+          .post(import.meta.env.VITE_SERVER_DOMAIN + "/create-blog", {...blogObj, id:blog_id}, {
             headers: {
               Authorization: `Bearer ${access_token}`,
             },
