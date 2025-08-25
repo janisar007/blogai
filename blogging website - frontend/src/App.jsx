@@ -8,40 +8,39 @@ import Homepage from "./pages/home.page";
 import SearchPage from "./pages/search.page";
 import PageNotFound from "./pages/404.page";
 import ProfilePage from "./pages/profile.page";
+import BlogPage from "./pages/blog.page";
 
 export const UserContext = createContext({});
 
 const App = () => {
+  const [userAuth, setUserAuth] = useState({
+    access_token: "",
+    fullname: "",
+    profile_img: "",
+    username: "",
+  });
 
-    const [userAuth, setUserAuth] = useState({
-        access_token: "",
-        fullname: "",
-        profile_img: "",
-        username: "",
-
-    });
-
-    useEffect(() => {
-
-        let userInSession = lookInSession("user");
-        userInSession ? setUserAuth(JSON.parse(userInSession)) : setUserAuth({ access_token: null })
-
-    }, [])
+  useEffect(() => {
+    let userInSession = lookInSession("user");
+    userInSession
+      ? setUserAuth(JSON.parse(userInSession))
+      : setUserAuth({ access_token: null });
+  }, []);
 
   return (
-    <UserContext.Provider value={{userAuth, setUserAuth}}>
+    <UserContext.Provider value={{ userAuth, setUserAuth }}>
       <Routes>
-        <Route path="/editor" element={<Editor />}/>
+        <Route path="/editor" element={<Editor />} />
         <Route path="/" element={<Navbar />}>
-
           {/* index => path="/" */}
-          <Route index element={<Homepage />} /> 
+          <Route index element={<Homepage />} />
 
           <Route path="signin" element={<UserAuthForm type={"sign-in"} />} />
           <Route path="signup" element={<UserAuthForm type={"sign-up"} />} />
 
           <Route path="search/:query" element={<SearchPage />} />
           <Route path="user/:id" element={<ProfilePage />} />
+          <Route path="blog/:blog_id" element={<BlogPage />} />
 
           <Route path="*" element={<PageNotFound />} />
         </Route>
