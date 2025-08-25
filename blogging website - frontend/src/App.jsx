@@ -10,7 +10,17 @@ import PageNotFound from "./pages/404.page";
 import ProfilePage from "./pages/profile.page";
 import BlogPage from "./pages/blog.page";
 
-export const UserContext = createContext({});
+
+
+export const UserContext = createContext({
+  userAuth: {
+    access_token: "",
+    fullname: "",
+    profile_img: "",
+    username: "",
+  },
+  setUserAuth: () => {},
+});
 
 const App = () => {
   const [userAuth, setUserAuth] = useState({
