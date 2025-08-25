@@ -31,6 +31,7 @@ const BlogPage = () => {
   let [blog, setBlog] = useState(blogStructure);
   let [similarBlogs, setSimilarBlogs] = useState(null);
   let [loading, setLoading] = useState(true);
+  let [isLikedByUser, setIsLikedByUser] = useState(false);
 
 
   let {
@@ -90,7 +91,7 @@ const BlogPage = () => {
       {loading ? (
         <Loader />
       ) : (
-        <BlogContext.Provider value={{ blog, setBlog }}>
+        <BlogContext.Provider value={{ blog, setBlog, isLikedByUser, setIsLikedByUser }}>
           <div className="max-w-[900px] center py-10 max-lg:px-[5vw]">
             <img src={banner} className="aspect-video" />
 
