@@ -7,6 +7,7 @@ import Loader from "../components/loader.component";
 import AnimationWrapper from "../common/page-animation";
 import { UserContext } from "../App";
 import { useContext } from "react";
+import AboutUser from "../components/about.component";
 
 export const profileDataStructure = {
   personal_info: {
@@ -102,6 +103,8 @@ const ProfilePage = () => {
                 " "
               )}
             </div>
+
+            <AboutUser className={"max-md:hidden"} bio={bio} social_links={social_links} joinedAt={joinedAt} />
           </div>
         </section>
       )}
