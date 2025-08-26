@@ -85,7 +85,8 @@ const CommentField = ({
           newCommentArr = [data, ...commentsArr];
         }
 
-        let parentCommentIncrementVal = replyingTo ? 0 : 1;
+        // let parentCommentIncrementVal = replyingTo ? 0 : 1;
+        let parentCommentIncrementVal =  1;
 
         setBlog({
           ...blog,

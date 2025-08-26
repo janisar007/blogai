@@ -16,7 +16,7 @@ const BlogInteraction = () => {
       title,
       blog_id,
       activity,
-      activity: { total_likes, total_comments },
+      activity: { total_likes, total_comments, total_parent_comments },
       author: {
         personal_info: { username: author_username },
       },
@@ -113,7 +113,7 @@ const BlogInteraction = () => {
           >
             <i className="fi fi-rr-comment-dots"></i>
           </button>
-          <p className="text-xl text-dark-grey">{total_comments}</p>
+          <p className="text-xl text-dark-grey">{total_parent_comments}</p>
         </div>
 
         <div className="flex gap-6 items-center">
