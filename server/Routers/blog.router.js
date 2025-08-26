@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { createBlog, searchBlog, trendingBlog,  latestBlog, allLatestBlogsCount, searchBlogCount, getBlog, likeBlog, getLikedByUser, addComment, getBlogComments } from "../Controllers/blog.controller.js";
+import { createBlog, searchBlog, trendingBlog,  latestBlog, allLatestBlogsCount, searchBlogCount, getBlog, likeBlog, getLikedByUser, addComment, getBlogComments, getReplies } from "../Controllers/blog.controller.js";
 import { verifyJWT } from "../Middlewares/verifyJWT.middleware.js";
 const router = Router();
 
@@ -16,5 +16,6 @@ router.route("/get-blog").post(getBlog);
 //-------comments---------------
 router.route("/add-comment").post(verifyJWT, addComment);
 router.route("/get-blog-comments").post(getBlogComments);
+router.route("/get-replies").post(getReplies);
 
 export default router;

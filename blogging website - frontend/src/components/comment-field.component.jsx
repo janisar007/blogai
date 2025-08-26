@@ -6,7 +6,12 @@ import toast, { Toaster } from "react-hot-toast";
 import axios from "axios";
 import { BlogContext } from "../pages/blog.page";
 
-const CommentField = ({ action }) => {
+const CommentField = ({
+  action,
+  index = undefined,
+  replyingTo = undefined,
+  setReplying,
+}) => {
   const [comment, setComment] = useState("");
 
   let {
@@ -44,6 +49,7 @@ const CommentField = ({ action }) => {
           _id,
           blog_author,
           comment,
+          replying_to: replyingTo,
         },
         {
           headers: {
@@ -60,11 +66,26 @@ const CommentField = ({ action }) => {
 
         let newCommentArr;
 
-        data.childrenLevel = 0; //parent commment;
+        if (replyingTo) {
+          commentsArr[index].children.push(data._id);
 
-        newCommentArr = [data, ...commentsArr];
+          data.childrenLevel = commentsArr[index].childrenLevel + 1;
+          data.parentIndex = index;
 
-        let parentCommentIncrementVal = 1;
+          commentsArr[index].isReplyLoaded = true;
+
+          commentsArr.splice(index + 1, 0, data);
+
+          newCommentArr = commentsArr;
+
+          setReplying(false);
+        } else {
+          data.childrenLevel = 0; //parent commment;
+
+          newCommentArr = [data, ...commentsArr];
+        }
+
+        let parentCommentIncrementVal = replyingTo ? 0 : 1;
 
         setBlog({
           ...blog,
@@ -100,3 +121,5 @@ const CommentField = ({ action }) => {
 };
 
 export default CommentField;
+
+//4.30.00 pe dekhna agar rely me koi problem aaye
