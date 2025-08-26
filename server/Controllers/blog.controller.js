@@ -342,7 +342,6 @@ export const addComment = async (req, res) => {
   if (replying_to) {
     commentObj.parent = replying_to;
     commentObj.isReply = true;
-
   }
 
   new Comment(commentObj)
@@ -452,4 +451,63 @@ export const getReplies = (req, res) => {
     .catch((err) => {
       return res.status(500).json({ error: err.message });
     });
+};
+
+const deleteCommentsFunction = (_id) => {
+  Comment.findOneAndDelete({ _id })
+    .then((comment) => {
+      if (comment.parent) {
+        Comment.findOneAndUpdate(
+          { _id: comment.parent },
+          { $pull: { children: _id } }
+        )
+          .then((data) => console.log("comment delete from parent"))
+          .catch((err) => console.log(err));
+      }
+
+      Notification.findOneAndDelete({ comment: _id }).then((notification) =>
+        console.log("comment notification deleted")
+      );
+
+      Notification.findOneAndDelete({ reply: _id }).then((notification) =>
+        console.log("reply notification deleted")
+      );
+
+      blogModel
+        .findOneAndUpdate(
+          { _id: comment.blog_id },
+          {
+            $pull: { comments: _id },
+            $inc: { "activity.total_comments": -1 },
+            $inc: { "activity.total_parent_comments": -1 },
+          }
+        )
+        .then((blog) => {
+          if (comment.children.length) {
+            comment.children.map((replies) => {
+              deleteCommentsFunction(replies);
+            });
+          }
+        });
+    })
+    .catch((err) => {
+      console.log(err.message);
+    });
+};
+export const deleteComment = (req, res) => {
+  let user_id = req.user;
+
+  let { _id } = req.body;
+
+  Comment.findOne({ _id }).then((comment) => {
+    if (user_id == comment.commented_by || user_id == comment.blog_author) {
+      deleteCommentsFunction(_id);
+
+      return res.status(200).json({ status: "done" });
+    } else {
+      return res
+        .status(403)
+        .json({ error: "You can not delete this comment!" });
+    }
+  });
 };
