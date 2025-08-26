@@ -5,7 +5,7 @@ import bcrypt from "bcrypt";
 import { nanoid } from "nanoid";
 import jwt from "jsonwebtoken";
 import cors from "cors";
-import multer from 'multer';
+import multer from "multer";
 import admin from "firebase-admin";
 import { v2 as cloudinary } from "cloudinary";
 import serviceAccountKey from "./blogio-42f85-firebase-adminsdk-fbsvc-aa9314159d.json" with { type: "json" };
@@ -15,7 +15,7 @@ import { getAuth } from "firebase-admin/auth";
 import User from "./Schema/User.js";
 import blogRouter from "./Routers/blog.router.js";
 import usersRouter from "./Routers/user.router.js";
-
+import { verifyJWT } from "./Middlewares/verifyJWT.middleware.js";
 
 const server = express();
 let PORT = 5000;
@@ -40,8 +40,6 @@ let passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,20}$/; // regex for pass
 server.use(express.json());
 server.use(cors());
 
-
-
 mongoose
   .connect(process.env.DB_LOCATION, {
     autoIndex: true,
@@ -54,29 +52,30 @@ mongoose
     throw err;
   });
 
+server.post(
+  "/upload-file-cloud",
+  uploadMulter.single("file"),
+  async (req, res) => {
+    try {
+      // Convert buffer to base64
+      const fileStr = `data:${
+        req.file.mimetype
+      };base64,${req.file.buffer.toString("base64")}`;
 
+      // Upload to Cloudinary
+      const result = await cloudinary.uploader.upload(fileStr, {
+        folder: "mern_uploads", // optional folder in Cloudinary
+      });
 
-
-server.post("/upload-file-cloud", uploadMulter.single("file"), async (req, res) => {
-  try {
-    // Convert buffer to base64
-    const fileStr = `data:${req.file.mimetype};base64,${req.file.buffer.toString("base64")}`;
-
-    // Upload to Cloudinary
-    const result = await cloudinary.uploader.upload(fileStr, {
-      folder: "mern_uploads", // optional folder in Cloudinary
-    });
-
-    res.status(200).json({
-      url: result.secure_url, // ✅ public file URL
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Upload failed" });
+      res.status(200).json({
+        url: result.secure_url, // ✅ public file URL
+      });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: "Upload failed" });
+    }
   }
-});
-
-
+);
 
 const formatDatatoSend = (user) => {
   const access_token = jwt.sign(
@@ -103,13 +102,7 @@ const generateUsername = async (email) => {
   return username;
 };
 
-
-
-
-
-
 //-------------------------sign in , sign up---------------------
-
 
 server.post("/signup", (req, res) => {
   let { fullname, email, password } = req.body;
@@ -152,7 +145,6 @@ server.post("/signup", (req, res) => {
   });
 });
 
-
 server.post("/signin", (req, res) => {
   let { email, password } = req.body;
 
@@ -175,12 +167,10 @@ server.post("/signin", (req, res) => {
           }
         });
       } else {
-        return res
-          .status(403)
-          .json({
-            error:
-              "Account is already created via google. Try loging with google.",
-          });
+        return res.status(403).json({
+          error:
+            "Account is already created via google. Try loging with google.",
+        });
       }
     })
     .catch((err) => {
@@ -192,7 +182,7 @@ server.post("/signin", (req, res) => {
 server.post("/google-auth", async (req, res) => {
   let { idToken } = req.body;
 
-  console.log(idToken)
+  console.log(idToken);
 
   getAuth()
     .verifyIdToken(idToken)
@@ -215,12 +205,10 @@ server.post("/google-auth", async (req, res) => {
       if (user) {
         //login
         if (!user.google_auth) {
-          return res
-            .status(403)
-            .json({
-              error:
-                "This email was signed up without google. Please log in with password to access the account",
-            });
+          return res.status(403).json({
+            error:
+              "This email was signed up without google. Please log in with password to access the account",
+          });
         }
       } else {
         //sign up with google, first time
@@ -250,12 +238,169 @@ server.post("/google-auth", async (req, res) => {
       return res.status(200).json(formatDatatoSend(user));
     })
     .catch((err) => {
-      return res
-        .status(500)
-        .json({
+      return res.status(500).json({
+        error:
+          "Failed to authenticate you with google. Try another google account.",
+      });
+    });
+});
+
+server.post("/change-password", verifyJWT, (req, res) => {
+  let { currentPassword, newPassword } = req.body;
+
+  // Password validation
+  if (
+    !passwordRegex.test(currentPassword) ||
+    !passwordRegex.test(newPassword)
+  ) {
+    return res.status(403).json({
+      error:
+        "Password should be 6 to 12 characters long with at least 1 number, 1 lowercase, and 1 uppercase letter",
+    });
+  }
+
+  // Find user
+  User.findOne({ _id: req.user })
+    .then((user) => {
+      if (user.google_auth) {
+        return res.status(403).json({
           error:
-            "Failed to authenticate you with google. Try another google account.",
+            "You cannot change the password because you logged in through Google!",
         });
+      }
+
+      // Compare current password
+      bcrypt.compare(
+        currentPassword,
+        user.personal_info.password,
+        (err, result) => {
+          if (err) {
+            return res.status(500).json({
+              error:
+                "Some error occurred while changing the password. Please try again later!",
+            });
+          }
+
+          if (!result) {
+            return res
+              .status(403)
+              .json({ error: "Incorrect current password!" });
+          }
+
+          // Hash new password
+          bcrypt.hash(newPassword, 10, (err, hashed_password) => {
+            if (err) {
+              return res.status(500).json({
+                error:
+                  "Error while hashing the new password. Please try again later!",
+              });
+            }
+
+            // Update password
+            User.findOneAndUpdate(
+              { _id: req.user },
+              { "personal_info.password": hashed_password }
+            )
+              .then(() => {
+                return res
+                  .status(200)
+                  .json({ status: "Password changed successfully!" });
+              })
+              .catch((err) => {
+                return res.status(500).json({
+                  error:
+                    "Some error occurred while updating the new password. Try again later!",
+                });
+              });
+          });
+        }
+      );
+    })
+    .catch((err) => {
+      console.log(err);
+      return res.status(500).json({ error: err.message });
+    });
+});
+
+server.post("/update-profile-img", verifyJWT, (req, res) => {
+  let { url } = req.body;
+
+  User.findOneAndUpdate(
+    { _id: req.user },
+    {
+      "personal_info.profile_img": url,
+    }
+  )
+    .then(() => {
+      return res.status(200).json({ profile_img: url });
+    })
+    .catch((err) => {
+      console.log(err);
+      return res.status(500).json({ error: err.message });
+    });
+});
+
+server.post("/update-profile", verifyJWT, (req, res) => {
+  let { username, bio, social_links } = req.body;
+
+  let bioLimit = 150;
+
+  if (username.length < 3) {
+    return res
+      .status(403)
+      .json({ error: "Username should be 3 character long!" });
+  }
+
+  if (bio.length > bioLimit) {
+    return res
+      .status(403)
+      .json({ error: `Bio should not be more than ${bioLimit}` });
+  }
+
+  let socialLinksArr = Object.keys(social_links);
+
+  try {
+    for (let i = 0; i < socialLinksArr.length; i++) {
+      if (social_links[socialLinksArr[i]].length) {
+        let hostname = new URL(social_links[socialLinksArr[i]]).hostname;
+
+        if (
+          !hostname.includes(`${socialLinksArr[i]}.com`) &&
+          socialLinksArr[i] != "website"
+        ) {
+          return res
+            .status(403)
+            .json({ error: `${socialLinksArr[i]} link is invalid.` });
+        }
+      }
+    }
+  } catch (error) {
+    console.log(error)
+    return res
+      .status(500)
+      .json({ error: "You must provide full links with http(s) included!" });
+  }
+
+  let updateObj = {
+    "personal_info.username": username,
+    "personal_info.bio": bio,
+    social_links,
+  };
+
+  User.findOneAndUpdate({ _id: req.user }, updateObj, {
+    runValidatores: true,
+  })
+    .then(() => {
+      return res.status(200).json({ username });
+    })
+    .catch((err) => {
+
+      console.log(err)
+      if (err.code == 11000) {
+        return res.status(409).json({ error: "username is already taken!" });
+      }
+
+      return res.status(500).json({ error: "Internal server error!  last" });
     });
 });
 
