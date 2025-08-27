@@ -75,7 +75,7 @@ const BlogInteraction = () => {
           }
         )
         .then(({ data }) => {
-          console.log(data);
+          console.log("data found!");
         })
         .catch((err) => {
           console.log(err);

@@ -183,7 +183,6 @@ const EditProfile = () => {
         toast.success("Profile updated successfully!");
       })
       .catch(({ response }) => {
-        console.log(response)
         toast.dismiss(loadingToast);
 
         e.target.removeAttribute("disabled");

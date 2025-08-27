@@ -512,9 +512,6 @@ export const deleteComment = (req, res) => {
   let { _id } = req.body;
 
   Comment.findOne({ _id }).then((comment) => {
-    // console.log(`${_id}`)
-    // console.log(`${user_id} - ${comment.commented_by}`)
-    // console.log(`${user_id} - ${comment.blog_author}`)
 
     if (user_id == comment?.commented_by || user_id == comment.blog_author) {
       deleteCommentsFunction(_id);

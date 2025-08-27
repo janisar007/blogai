@@ -72,7 +72,6 @@ const UserAuthForm = ({ type }) => {
         idToken:idToken
       }
 
-      console.log(formData)
 
       userAuthThroughServer(serverRoute, formData)
 

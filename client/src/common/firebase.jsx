@@ -22,8 +22,7 @@ const auth = getAuth(app);
 const authWithGoogle = async () => {
   try {
     const result = await signInWithPopup(auth, provider);
-    console.log(result)
-    const idToken = await result.user.getIdToken(); // 👈 important
+    const idToken = await result.user.getIdToken();
     return idToken;
   } catch (err) {
     console.error(err);
