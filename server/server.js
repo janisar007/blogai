@@ -23,7 +23,7 @@ let PORT = 5000;
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET, 
+  api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
 // Multer setup (for handling multipart/form-data)
@@ -32,17 +32,17 @@ const uploadMulter = multer({ storageMulter });
 
 admin.initializeApp({
   credential: admin.credential.cert({
-    type:"service_account",
-    project_id:process.env.FIREBASE_PROJECT_ID,
-    private_key_id:process.env.FIREBASE_PRIVATE_KEY_ID,
-    private_key:process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, "\n"),
-    client_email:process.env.FIREBASE_CLIENT_EMAIL,
-    client_id:process.env.FIREBASE_CLIENT_ID,
-    auth_uri:"https://accounts.google.com/o/oauth2/auth",
-    token_uri:"https://oauth2.googleapis.com/token",
-    auth_provider_x509_cert_url:"https://www.googleapis.com/oauth2/v1/certs",
-    client_x509_cert_url:process.env.FIREBASE_CLIENT_CRET_URL,
-    universe_domain:"googleapis.com"
+    type: "service_account",
+    project_id: process.env.FIREBASE_PROJECT_ID,
+    private_key_id: process.env.FIREBASE_PRIVATE_KEY_ID,
+    private_key: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, "\n"),
+    client_email: process.env.FIREBASE_CLIENT_EMAIL,
+    client_id: process.env.FIREBASE_CLIENT_ID,
+    auth_uri: "https://accounts.google.com/o/oauth2/auth",
+    token_uri: "https://oauth2.googleapis.com/token",
+    auth_provider_x509_cert_url: "https://www.googleapis.com/oauth2/v1/certs",
+    client_x509_cert_url: process.env.FIREBASE_CLIENT_CRET_URL,
+    universe_domain: "googleapis.com",
   }),
 });
 
@@ -63,13 +63,6 @@ mongoose
     console.error("❌ Failed Database connection error:", err);
     throw err;
   });
-
-  server.get('/', (req, res) => {
-
-
-    res.json({name: "janisar"})
-
-  })
 
 server.post(
   "/upload-file-cloud",
@@ -392,7 +385,7 @@ server.post("/update-profile", verifyJWT, (req, res) => {
       }
     }
   } catch (error) {
-    console.log(error)
+    console.log(error);
     return res
       .status(500)
       .json({ error: "You must provide full links with http(s) included!" });
@@ -411,8 +404,7 @@ server.post("/update-profile", verifyJWT, (req, res) => {
       return res.status(200).json({ username });
     })
     .catch((err) => {
-
-      console.log(err)
+      console.log(err);
       if (err.code == 11000) {
         return res.status(409).json({ error: "username is already taken!" });
       }
@@ -425,6 +417,8 @@ server.use("", blogRouter);
 server.use("", usersRouter);
 server.use("", notificationRouter);
 
-server.listen(PORT, () => {
-  console.log("listening on port -> " + PORT);
+server.get("/", (req, res) => {
+  res.json({ name: "janisar" });
 });
+
+export default server;
