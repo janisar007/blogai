@@ -1,16 +1,18 @@
 import { Link, Outlet, useNavigate } from "react-router-dom";
-import logo from "../imgs/logo.png";
 import tightblogailogopng from "../imgs/tightblogailogopng.png";
 import { useContext, useEffect, useState } from "react";
-import { UserContext } from "../App";
+import { ThemeContext, UserContext } from "../App";
 import UserNavigationPanel from "./user-navigation.component";
 import axios from "axios";
+import { storeInSession } from "../common/session";
 
 const Navbar = () => {
   const [searchBoxVisibility, setSearchBoxVisibility] = useState(false);
   const [userNavPanel, setUserNavPanel] = useState(false);
 
   let navigate = useNavigate();
+
+  let { theme, setTheme } = useContext(ThemeContext);
 
   const {
     userAuth,
@@ -44,6 +46,16 @@ const Navbar = () => {
     setTimeout(() => {
       setUserNavPanel(false);
     }, 240);
+  };
+
+  const changeTheme = () => {
+    let newTheme = theme == "dark" ? "light" : "dark";
+
+    setTheme(newTheme);
+
+    document.body.setAttribute("data-theme", newTheme);
+
+    storeInSession("theme", newTheme);
   };
 
   const handleSearch = (e) => {
@@ -88,6 +100,19 @@ const Navbar = () => {
             <i className="fi fi-rr-file-edit"></i>
             <p>Write</p>
           </Link>
+
+          <button
+            className="w-12 h-12 rounded-full bg-grey relative hover:bg-black/10"
+            onClick={changeTheme}
+          >
+            <i
+              className={
+                "fi fi-rr-" +
+                (theme == "light" ? "moon-stars" : "sun") +
+                " text-2xl block mt-1"
+              }
+            ></i>
+          </button>
 
           {access_token ? (
             <>

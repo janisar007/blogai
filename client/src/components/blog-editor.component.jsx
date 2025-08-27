@@ -3,15 +3,16 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 
 import { Toaster, toast } from "react-hot-toast";
 
-import logo from "../imgs/logo.png";
+
 import defaultBanner from "../imgs/blog banner.png";
+import defaultBannerDark from "../imgs/blog banner dark.png";
 import tightblogailogopng from "../imgs/tightblogailogopng.png";
 import AnimationWrapper from "../common/page-animation";
 import axios from "axios";
 import EditorJS from "@editorjs/editorjs";
 import { EditorContext } from "../pages/editor.pages";
 import { tools } from "./tools.component";
-import { UserContext } from "../App";
+import { ThemeContext, UserContext } from "../App";
 
 const BlogEditor = () => {
   let {
@@ -22,6 +23,9 @@ const BlogEditor = () => {
     setTextEditor,
     setEditorState,
   } = useContext(EditorContext);
+  let {
+    theme
+  } = useContext(ThemeContext);
 
   let {blog_id} = useParams();
 
@@ -93,7 +97,7 @@ const BlogEditor = () => {
   const handleError = (e) => {
     let img = e.target;
 
-    img.src = defaultBanner;
+    img.src = theme == "light" ? defaultBanner : defaultBannerDark;
   };
 
   const handlePublishEvent = () => {
@@ -209,12 +213,13 @@ const BlogEditor = () => {
             <textarea
               defaultValue={title}
               placeholder="Blog Title"
-              className="text-4xl font-medium w-full h-20 outline-none resize-none mt-10 leading-tight placeholder:opacity-40"
+              className={`text-4xl bg-white  font-medium w-full h-20 outline-none resize-none mt-10 leading-tight placeholder:opacity-40`}
               onKeyDown={handleTitleKeyDown}
               onChange={handleTitleChange}
             ></textarea>
 
             <hr className="w-full opacity-10 my-5" />
+
 
             <div id="textEditor" className="font-gelasio"></div>
           </div>
