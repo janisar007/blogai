@@ -64,6 +64,13 @@ mongoose
     throw err;
   });
 
+  server.get('/', (req, res) => {
+
+
+    res.json({name: "janisar"})
+
+  })
+
 server.post(
   "/upload-file-cloud",
   uploadMulter.single("file"),
