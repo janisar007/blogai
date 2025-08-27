@@ -16,7 +16,11 @@ const blogStructure = {
   author: { personal_info: {} },
 };
 
-export const EditorContext = createContext({});
+const initaliData = {
+  blog: { title: "", banner: "", content: "", tags: [], des: "" },
+};
+
+export const EditorContext = createContext(initaliData);
 
 const Editor = () => {
   let { blog_id } = useParams();
@@ -34,23 +38,21 @@ const Editor = () => {
       return setLoading(false);
     }
 
-    axios.post(import.meta.env.VITE_SERVER_DOMAIN + "/get-blog", {
-      blog_id,
-      draft: true,
-      mode: "edit"
-    }).then(({data: {blog}}) => {
-
-      setBlog(blog);
-      setLoading(false);
-
-    })
-    .catch((err) => {
-
-      console.log(err)
-      setBlog(null);
-      setLoading(false);
-
-    })
+    axios
+      .post(import.meta.env.VITE_SERVER_DOMAIN + "/get-blog", {
+        blog_id,
+        draft: true,
+        mode: "edit",
+      })
+      .then(({ data: { blog } }) => {
+        setBlog(blog);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.log(err);
+        setBlog(null);
+        setLoading(false);
+      });
   }, []);
 
   return (

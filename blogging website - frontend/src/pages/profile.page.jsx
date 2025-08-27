@@ -37,7 +37,6 @@ const ProfilePage = () => {
   let [loading, setLoading] = useState(true);
   let [blogs, setBlogs] = useState(null);
   let [profileLoaded, setProfileLoaded] = useState("");
-  console.log(blogs);
 
   let {
     personal_info: { fullname, username: profile_username, profile_img, bio },

@@ -480,9 +480,10 @@ const deleteCommentsFunction = (_id) => {
         console.log("comment notification deleted")
       );
 
-      Notification.findOneAndUpdate({ reply: _id }, { $unset: {reply: 1} }).then((notification) =>
-        console.log("reply notification deleted")
-      );
+      Notification.findOneAndUpdate(
+        { reply: _id },
+        { $unset: { reply: 1 } }
+      ).then((notification) => console.log("reply notification deleted"));
 
       blogModel
         .findOneAndUpdate(
@@ -511,7 +512,6 @@ export const deleteComment = (req, res) => {
   let { _id } = req.body;
 
   Comment.findOne({ _id }).then((comment) => {
-
     // console.log(`${_id}`)
     // console.log(`${user_id} - ${comment.commented_by}`)
     // console.log(`${user_id} - ${comment.blog_author}`)
@@ -526,4 +526,37 @@ export const deleteComment = (req, res) => {
         .json({ error: "You can not delete this comment!" });
     }
   });
+};
+
+export const deleteBlog = (req, res) => {
+  let user_id = req.user;
+
+  let { blog_id } = req.body;
+
+  blogModel
+    .findOneAndDelete({ blog_id })
+    .then((blog) => {
+      Notification.deleteMany({ blog: blog._id }).then((data) => {
+        console.log("notifications deleted!");
+      });
+
+      Comment.deleteMany({ blog_id: blog._id }).then((data) => {
+        console.log("comments deleted!");
+      });
+
+      User.findOneAndUpdate(
+        { _id: user_id },
+        {
+          $pull: { blog: blog._id },
+          $inc: { "account_info.total_posts": -1 },
+        }
+      ).then((user) => {
+        console.log("blog deleted!");
+      });
+
+      return res.status(200).json({ status: "done" });
+    })
+    .catch((err) => {
+      return res.status(500).json({ error: err.message });
+    });
 };
