@@ -4,42 +4,35 @@ import { UserContext } from "../App";
 
 const SideNav = () => {
   let {
-    userAuth: { access_token },
+    userAuth: { access_token, new_notification_available },
   } = useContext(UserContext);
 
   let page = location.pathname.split("/")[2];
 
-  let [ pageState, setPageState ] = useState(page.replace('-', ' '));
-  let [ showSideNav, setShowSideNav ] = useState(false);
+  let [pageState, setPageState] = useState(page.replace("-", " "));
+  let [showSideNav, setShowSideNav] = useState(false);
 
   let activieTabLine = useRef();
   let sideBarIconTab = useRef();
   let pageStateTab = useRef();
 
   const changePageState = (e) => {
-
     let { offsetWidth, offsetLeft } = e.target;
 
-    activieTabLine.current.style.width = offsetWidth + "px"
-    activieTabLine.current.style.left = offsetLeft + "px"
+    activieTabLine.current.style.width = offsetWidth + "px";
+    activieTabLine.current.style.left = offsetLeft + "px";
 
-    if(e.target == sideBarIconTab.current) {
-        setShowSideNav(true)
-
-
+    if (e.target == sideBarIconTab.current) {
+      setShowSideNav(true);
     } else {
-        setShowSideNav(false)
-
+      setShowSideNav(false);
     }
-
-  }
+  };
 
   useEffect(() => {
-
     setShowSideNav(false);
     pageStateTab.current.click();
-
-  }, [pageState])
+  }, [pageState]);
 
   return access_token === null ? (
     <Navigate to={"/signin"} />
@@ -47,24 +40,37 @@ const SideNav = () => {
     <>
       <section className="relative flex gap-10 py-0 m-0 max-md:flex-col">
         <div className="sticky top-[80px] z-30">
+          <div className="md:hidden bg-white py-1 border-b border-grey flex flex-nowrap overflow-x-auto">
+            <button
+              ref={sideBarIconTab}
+              className="p-5 capitalize"
+              onClick={changePageState}
+            >
+              <i className="fi fi-rr-bars-staggered pointer-events-none"></i>
+            </button>
 
-            <div className="md:hidden bg-white py-1 border-b border-grey flex flex-nowrap overflow-x-auto">
+            <button
+              ref={pageStateTab}
+              className="p-5 capitalize"
+              onClick={changePageState}
+            >
+              {pageState}
+            </button>
 
-                <button ref={sideBarIconTab} className="p-5 capitalize" onClick={changePageState}>
-                    <i className="fi fi-rr-bars-staggered pointer-events-none"></i>
-                </button>
+            <hr
+              ref={activieTabLine}
+              className="absolute bottom-0 duration-500"
+            />
+          </div>
 
-                <button  ref={pageStateTab} className="p-5 capitalize"  onClick={changePageState}>
-                    {
-                        pageState
-
-                    }
-                </button>
-
-                <hr ref={activieTabLine} className="absolute bottom-0 duration-500"/>
-            </div>
-
-          <div className={"min-w-[200px] h-[calc(100vh-80px-60px)] md:h-cover md:sticky top-24 overflow-y-auto p-6 md:pr-0 md:border-grey md:border-r absolute max-md:top-[64px] bg-white max-md:w-[calc(100%+80px)] max-md:px-16 max-md:-ml-7 duration-500 " + (!showSideNav ? "max-md:opacity-0 max-md:pointer-events-none": "opacity-100 pointer-events-auto")}>
+          <div
+            className={
+              "min-w-[200px] h-[calc(100vh-80px-60px)] md:h-cover md:sticky top-24 overflow-y-auto p-6 md:pr-0 md:border-grey md:border-r absolute max-md:top-[64px] bg-white max-md:w-[calc(100%+80px)] max-md:px-16 max-md:-ml-7 duration-500 " +
+              (!showSideNav
+                ? "max-md:opacity-0 max-md:pointer-events-none"
+                : "opacity-100 pointer-events-auto")
+            }
+          >
             <h1 className="text-xl text-dark-grey mb-3">Dashboard</h1>
 
             <hr className="border-grey -ml-6 mb-8 mr-6" />
@@ -78,11 +84,18 @@ const SideNav = () => {
             </NavLink>
 
             <NavLink
-              to="/dashboard/notification"
+              to="/dashboard/notifications"
               onClick={(e) => setPageState(e.target.innerText)}
               className="sidebar-link"
             >
-              <i className="fi fi-rr-bell"></i>
+              <div className="relative">
+                <i className="fi fi-rr-bell"></i>
+                {new_notification_available ? (
+                  <span className="bg-red w-2 h-2 rounded-full absolute z-10 top-0 right-0"></span>
+                ) : (
+                  ""
+                )}
+              </div>
               Notification
             </NavLink>
 

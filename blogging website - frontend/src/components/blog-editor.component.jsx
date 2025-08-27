@@ -5,6 +5,7 @@ import { Toaster, toast } from "react-hot-toast";
 
 import logo from "../imgs/logo.png";
 import defaultBanner from "../imgs/blog banner.png";
+import tightblogailogopng from "../imgs/tightblogailogopng.png";
 import AnimationWrapper from "../common/page-animation";
 import axios from "axios";
 import EditorJS from "@editorjs/editorjs";
@@ -170,8 +171,8 @@ const BlogEditor = () => {
   return (
     <>
       <nav className="navbar">
-        <Link to="/" className="flex-none w-10">
-          <img src={logo} />
+        <Link to="/" className="flex-none w-20">
+          <img src={tightblogailogopng} />
         </Link>
 
         <p className="max-md:hidden text-black line-clamp-1 w-full">

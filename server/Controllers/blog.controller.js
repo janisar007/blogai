@@ -324,7 +324,7 @@ export const getLikedByUser = (req, res) => {
 export const addComment = async (req, res) => {
   let user_id = req.user;
 
-  let { _id, comment, blog_author, replying_to } = req.body;
+  let { _id, comment, blog_author, replying_to, notification_id } = req.body;
 
   if (!comment.length) {
     return res
@@ -381,6 +381,17 @@ export const addComment = async (req, res) => {
         ).then((replyingToCommentDoc) => {
           notificationObj.notification_for = replyingToCommentDoc.commented_by;
         });
+
+        if (notification_id) {
+          Notification.findOneAndUpdate(
+            { _id: notification_id },
+            {
+              reply: commentFile._id,
+            }
+          ).then((notification) => {
+            console.log("notification updated!");
+          });
+        }
       }
 
       new Notification(notificationObj).save().then((data) => {
@@ -469,7 +480,7 @@ const deleteCommentsFunction = (_id) => {
         console.log("comment notification deleted")
       );
 
-      Notification.findOneAndDelete({ reply: _id }).then((notification) =>
+      Notification.findOneAndUpdate({ reply: _id }, { $unset: {reply: 1} }).then((notification) =>
         console.log("reply notification deleted")
       );
 
@@ -500,7 +511,12 @@ export const deleteComment = (req, res) => {
   let { _id } = req.body;
 
   Comment.findOne({ _id }).then((comment) => {
-    if (user_id == comment.commented_by || user_id == comment.blog_author) {
+
+    // console.log(`${_id}`)
+    // console.log(`${user_id} - ${comment.commented_by}`)
+    // console.log(`${user_id} - ${comment.blog_author}`)
+
+    if (user_id == comment?.commented_by || user_id == comment.blog_author) {
       deleteCommentsFunction(_id);
 
       return res.status(200).json({ status: "done" });

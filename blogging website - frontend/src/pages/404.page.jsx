@@ -1,6 +1,7 @@
 import React from 'react'
 import pageNotFoundImage from '../imgs/404.png'
 import fullLogo from '../imgs/full-logo.png'
+import tightblogailogopng from '../imgs/tightblogailogopng.png'
 import { Link } from 'react-router-dom'
 
 const PageNotFound = () => {
@@ -13,7 +14,7 @@ const PageNotFound = () => {
         <p className='text-dark-grey text-xl leading-7 -mt-8'>The page you are looking for does not exist. Head back to <Link className="text-black underline" to='/'>home page</Link>.</p>
 
         <div className='mt-auto'>
-            <img src={fullLogo} className='h-8 object-contain block mx-auto select-none'/>
+            <img src={tightblogailogopng} className='h-12 object-contain block mx-auto select-none'/>
             <p className='mt-5 text-dark-grey'>Read millions of articals around the world.</p>
         </div>
 

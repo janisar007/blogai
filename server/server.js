@@ -15,6 +15,7 @@ import { getAuth } from "firebase-admin/auth";
 import User from "./Schema/User.js";
 import blogRouter from "./Routers/blog.router.js";
 import usersRouter from "./Routers/user.router.js";
+import notificationRouter from "./Routers/notification.router.js";
 import { verifyJWT } from "./Middlewares/verifyJWT.middleware.js";
 
 const server = express();
@@ -406,6 +407,7 @@ server.post("/update-profile", verifyJWT, (req, res) => {
 
 server.use("", blogRouter);
 server.use("", usersRouter);
+server.use("", notificationRouter);
 
 server.listen(PORT, () => {
   console.log("listening on port -> " + PORT);
