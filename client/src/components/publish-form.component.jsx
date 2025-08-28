@@ -108,7 +108,8 @@ const PublishForm = () => {
           },
         }
       )
-      .then(() => {
+      .then((data) => {
+        console.log("htmlData", data)
         e.target.classList.remove("disable");
         toast.dismiss(loadingToast);
         toast.success("Published 👍");

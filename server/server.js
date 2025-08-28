@@ -16,14 +16,41 @@ import blogRouter from "./Routers/blog.router.js";
 import usersRouter from "./Routers/user.router.js";
 import notificationRouter from "./Routers/notification.router.js";
 import { verifyJWT } from "./Middlewares/verifyJWT.middleware.js";
+import blogModel from "./Schema/blog.model.js";
 
 const server = express();
 let PORT = 5000;
 
+
+server.get("/blog/:blog_id", async (req, res, next) => {
+  const userAgent = req.headers["user-agent"] || "";
+
+  // List of popular crawler bots
+  const botPattern = /(googlebot|bingbot|linkedinbot|twitterbot|facebookexternalhit|slackbot|discordbot|whatsapp|telegrambot|applebot|yandex|baiduspider|duckduckbot|semrushbot)/i;
+
+  if (botPattern.test(userAgent)) {
+    try {
+      // Fetch pre-rendered HTML from DB
+      const blog = await blogModel.findOne({ blog_id: req.params.blog_id });
+      if (!blog) return res.status(404).send("Not found");
+
+      res.setHeader("Content-Type", "text/html");
+      return res.send(blog.staticHTML);
+    } catch (err) {
+      console.error("Bot fetch error:", err);
+      return res.status(500).send("Server error");
+    }
+  }
+
+  // Normal user/browser → let React handle
+  next();
+});
+
+
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
+  api_secret: process.env.CLOUDINARY_API_SECRET, 
 });
 
 // Multer setup (for handling multipart/form-data)
@@ -32,17 +59,17 @@ const uploadMulter = multer({ storageMulter });
 
 admin.initializeApp({
   credential: admin.credential.cert({
-    type: "service_account",
-    project_id: process.env.FIREBASE_PROJECT_ID,
-    private_key_id: process.env.FIREBASE_PRIVATE_KEY_ID,
-    private_key: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, "\n"),
-    client_email: process.env.FIREBASE_CLIENT_EMAIL,
-    client_id: process.env.FIREBASE_CLIENT_ID,
-    auth_uri: "https://accounts.google.com/o/oauth2/auth",
-    token_uri: "https://oauth2.googleapis.com/token",
-    auth_provider_x509_cert_url: "https://www.googleapis.com/oauth2/v1/certs",
-    client_x509_cert_url: process.env.FIREBASE_CLIENT_CRET_URL,
-    universe_domain: "googleapis.com",
+    type:"service_account",
+    project_id:process.env.FIREBASE_PROJECT_ID,
+    private_key_id:process.env.FIREBASE_PRIVATE_KEY_ID,
+    private_key:process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, "\n"),
+    client_email:process.env.FIREBASE_CLIENT_EMAIL,
+    client_id:process.env.FIREBASE_CLIENT_ID,
+    auth_uri:"https://accounts.google.com/o/oauth2/auth",
+    token_uri:"https://oauth2.googleapis.com/token",
+    auth_provider_x509_cert_url:"https://www.googleapis.com/oauth2/v1/certs",
+    client_x509_cert_url:process.env.FIREBASE_CLIENT_CRET_URL,
+    universe_domain:"googleapis.com"
   }),
 });
 
@@ -63,6 +90,7 @@ mongoose
     console.error("❌ Failed Database connection error:", err);
     throw err;
   });
+
 
 server.post(
   "/upload-file-cloud",
@@ -385,7 +413,7 @@ server.post("/update-profile", verifyJWT, (req, res) => {
       }
     }
   } catch (error) {
-    console.log(error);
+    console.log(error)
     return res
       .status(500)
       .json({ error: "You must provide full links with http(s) included!" });
@@ -404,7 +432,8 @@ server.post("/update-profile", verifyJWT, (req, res) => {
       return res.status(200).json({ username });
     })
     .catch((err) => {
-      console.log(err);
+
+      console.log(err)
       if (err.code == 11000) {
         return res.status(409).json({ error: "username is already taken!" });
       }
@@ -417,8 +446,10 @@ server.use("", blogRouter);
 server.use("", usersRouter);
 server.use("", notificationRouter);
 
-server.get("/", (req, res) => {
-  res.json({ name: "janisar" });
-});
+
+
+// server.listen(PORT, () => {
+//   console.log("listening on port -> " + PORT);
+// });
 
 export default server;

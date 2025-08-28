@@ -3,6 +3,7 @@ import blogModel from "../Schema/blog.model.js";
 import User from "../Schema/User.js";
 import Notification from "../Schema/Notification.js";
 import Comment from "../Schema/Comment.js";
+import { generateBlogHTML } from "../utils/staticHtml.js";
 
 export const createBlog = async (req, res) => {
   try {
@@ -38,7 +39,11 @@ export const createBlog = async (req, res) => {
       }
     }
 
-    tags = tags.map((tag) => tag.toLowerCase());
+    const find_user = await User.findById(authorId);
+
+    if (!find_user) {
+      return res.status(404).json({ error: "user not found!" });
+    }
 
     let blog_id =
       id ||
@@ -47,11 +52,40 @@ export const createBlog = async (req, res) => {
         .replace(/\s+/g, "-")
         .trim() + nanoid();
 
+    tags = tags.map((tag) => tag.toLowerCase());
+
     if (id) {
+      const find_blog = await blogModel.findOne({ blog_id });
+
+      if (!find_blog) {
+        return res.status(404).json({ error: "blog not found!" });
+      }
+
+      const publishedAt = find_blog?.publishedAt;
+
+      let staticHTML = generateBlogHTML(
+        title,
+        banner,
+        tags,
+        des,
+        blog_id,
+        publishedAt,
+        find_user.personal_info,
+        content
+      );
+
       blogModel
         .findOneAndUpdate(
           { blog_id },
-          { title, des, banner, content, tags, draft: draft ? draft : false }
+          {
+            title,
+            des,
+            banner,
+            content,
+            tags,
+            staticHTML,
+            draft: draft ? draft : false,
+          }
         )
         .then(() => {
           return res.status(200).json({ id: blog_id });
@@ -75,7 +109,21 @@ export const createBlog = async (req, res) => {
 
       blog
         .save()
-        .then((blog) => {
+        .then(async (blog) => {
+          const staticHTML = generateBlogHTML(
+            title,
+            banner,
+            tags,
+            des,
+            blog_id,
+            blog.publishedAt,
+            find_user.personal_info,
+            content
+          );
+
+          blog.staticHTML = staticHTML;
+          await blog.save();
+
           let incrementVal = draft ? 0 : 1;
 
           User.findOneAndUpdate(
@@ -99,7 +147,7 @@ export const createBlog = async (req, res) => {
         });
     }
   } catch (error) {
-    return res.status(500).json({ erro: "Internal server error" });
+    return res.status(500).json({ error: error.message });
   }
 };
 
@@ -512,7 +560,6 @@ export const deleteComment = (req, res) => {
   let { _id } = req.body;
 
   Comment.findOne({ _id }).then((comment) => {
-
     if (user_id == comment?.commented_by || user_id == comment.blog_author) {
       deleteCommentsFunction(_id);
 
