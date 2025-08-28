@@ -108,14 +108,13 @@ const PublishForm = () => {
           },
         }
       )
-      .then((data) => {
-        console.log("htmlData", data)
+      .then(({data}) => {
         e.target.classList.remove("disable");
         toast.dismiss(loadingToast);
         toast.success("Published 👍");
 
         setTimeout(() => {
-          navigate("/dashboard/blogs");
+          navigate(`/blog/${data.id}`);
         }, 500);
       })
       .catch(({ response }) => {
