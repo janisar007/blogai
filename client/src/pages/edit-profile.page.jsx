@@ -211,7 +211,7 @@ const EditProfile = () => {
                 <div className="w-full h-full absolute top-0 left-0 flex items-center justify-center text-white bg-black/30 opacity-0 hover:opacity-100 cursor-pointer">
                   Upload Image
                 </div>
-                <img ref={profileImageEle} src={profile_img} />
+                <img loading="lazy" ref={profileImageEle} src={profile_img} />
               </label>
 
               <input

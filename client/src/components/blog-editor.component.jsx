@@ -176,7 +176,7 @@ const BlogEditor = () => {
     <>
       <nav className="navbar">
         <Link to="/" className="flex-none w-20">
-          <img src={tightblogailogopng} />
+          <img loading="lazy" src={tightblogailogopng} />
         </Link>
 
         <p className="max-md:hidden text-black line-clamp-1 w-full">
@@ -199,7 +199,7 @@ const BlogEditor = () => {
           <div className="mx-auto max-w-[900px] w-full">
             <div className="relative aspect-video bg-whiteborder-2 border-grey hover:opacity-80">
               <label htmlFor="uploadBanner">
-                <img src={banner} className="z-20" onError={handleError} />
+                <img loading="lazy" src={banner} className="z-20" onError={handleError} />
                 <input
                   id="uploadBanner"
                   type="file"

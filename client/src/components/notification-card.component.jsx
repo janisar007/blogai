@@ -79,7 +79,7 @@ const NotificationCard = ({ data, index, notificationState }) => {
   return (
     <div className={"p-6 border-b border-grey border-l-black " +(!seen? "border-l-2": "" ) }>
       <div className="flex gap-5 mb-3">
-        <img src={profile_img} className="w-14 h-14 flex-none rounded-full" />
+        <img loading="lazy" src={profile_img} className="w-14 h-14 flex-none rounded-full" />
 
         <div className="w-full">
           <h1 className="font-medium text-xl text-dark-grey">
@@ -168,7 +168,7 @@ const NotificationCard = ({ data, index, notificationState }) => {
       {reply ? (
         <div className="ml-20 p-5 bg-grey mt-5 rounded-md">
           <div className="flex gap-3 mb-3">
-            <img className="w-8 h-8 rounded-full" src={author_profile_img} />
+            <img loading="lazy" className="w-8 h-8 rounded-full" src={author_profile_img} />
 
             <div>
               <h1 className="font-medium text-xl text-dark-grey">

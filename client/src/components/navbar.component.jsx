@@ -70,7 +70,7 @@ const Navbar = () => {
     <>
       <nav className="navbar z-50">
         <Link to="/" className="flex-none w-20">
-          <img className="" src={tightblogailogopng} />
+          <img loading="lazy" className="" src={tightblogailogopng} />
         </Link>
 
         <div
@@ -134,7 +134,7 @@ const Navbar = () => {
                 onBlur={handleBlur}
               >
                 <button className="w-12 h-12 mt-1">
-                  <img
+                  <img loading="lazy"
                     src={profile_img}
                     className="w-full h-full object-cover rounded-full"
                   />

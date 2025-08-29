@@ -140,7 +140,7 @@ const UserAuthForm = ({ type }) => {
           onClick={handleGoogleAuth}
           
           >
-            <img src={googleIcon} className="w-5" />
+            <img loading="lazy" src={googleIcon} className="w-5" />
             continue with google
           </button>
           {type == "sign-in" ? (

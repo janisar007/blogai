@@ -144,14 +144,14 @@ const BlogPage = () => {
         >
           <CommentsContainer />
           <div className="max-w-[900px] center py-10 max-lg:px-[5vw]">
-            <img src={banner} className="aspect-video" />
+            <img loading="lazy" src={banner} className="aspect-video" />
 
             <div className="mt-12">
               <h2>{title}</h2>
 
               <div className="flex max-sm:flex-col justify-between my-8">
                 <div className="flex gap-5 items-start">
-                  <img src={profile_img} className="w-12 h-12 rounded-full" />
+                  <img loading="lazy" src={profile_img} className="w-12 h-12 rounded-full" />
                   <p className="capitalize">
                     {fullname}
                     <br />@

@@ -9,7 +9,7 @@ const PageNotFound = () => {
   let { theme } = useContext(ThemeContext);
   return (
     <section className="h-cover relative p-10 flex flex-col items-center gap-20 text-center">
-      <img
+      <img loading="lazy"
         src={theme == "light" ? light404 : dark404}
         className="select-none border-2 border-grey w-72 aspect-square object-cover rounded"
       />
@@ -24,7 +24,7 @@ const PageNotFound = () => {
       </p>
 
       <div className="mt-auto">
-        <img
+        <img loading="lazy"
           src={tightblogailogopng}
           className="h-12 object-contain block mx-auto select-none"
         />
