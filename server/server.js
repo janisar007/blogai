@@ -21,17 +21,18 @@ import blogModel from "./Schema/blog.model.js";
 const server = express();
 let PORT = 5000;
 
-
-server.get("/blog/:blog_id", async (req, res, next) => {
+//For bots ->
+server.get("/blog/:id", async (req, res, next) => {
   const userAgent = req.headers["user-agent"] || "";
 
   // List of popular crawler bots
-  const botPattern = /(googlebot|bingbot|linkedinbot|twitterbot|facebookexternalhit|slackbot|discordbot|whatsapp|telegrambot|applebot|yandex|baiduspider|duckduckbot|semrushbot)/i;
+  const botPattern =
+    /(googlebot|bingbot|linkedinbot|twitterbot|facebookexternalhit|slackbot|discordbot|whatsapp|telegrambot|applebot|yandex|baiduspider|duckduckbot|semrushbot)/i;
 
   if (botPattern.test(userAgent)) {
     try {
       // Fetch pre-rendered HTML from DB
-      const blog = await blogModel.findOne({ blog_id: req.params.blog_id });
+      const blog = await blogModel.findOne({ blog_id: req.params.id });
       if (!blog) return res.status(404).send("Not found");
 
       res.setHeader("Content-Type", "text/html");
@@ -44,13 +45,42 @@ server.get("/blog/:blog_id", async (req, res, next) => {
 
   // Normal user/browser → let React handle
   next();
+}); 
+
+// Robots.txt
+server.get("/robots.txt", (req, res) => {
+  res.type("text/plain");
+  res.send(`
+User-agent: *
+Allow: /
+
+Sitemap: https://blogai-rose.vercel.app/sitemap.xml
+`);
 });
 
+// Sitemap.xml
+server.get("/sitemap.xml", async (req, res) => {
+  const blogs = await blogModel.find({ draft: false }).lean();
+  const urls = blogs
+    .map(
+      (b) => `
+  <url>
+    <loc>https://blogai-rose.vercel.app/blog/${b.blog_id}</loc>
+    <lastmod>${b.publishedAt.toISOString()}</lastmod>
+  </url>`
+    )
+    .join("");
+  res.type("application/xml");
+  res.send(`<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${urls}
+</urlset>`);
+});
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET, 
+  api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
 // Multer setup (for handling multipart/form-data)
@@ -59,17 +89,17 @@ const uploadMulter = multer({ storageMulter });
 
 admin.initializeApp({
   credential: admin.credential.cert({
-    type:"service_account",
-    project_id:process.env.FIREBASE_PROJECT_ID,
-    private_key_id:process.env.FIREBASE_PRIVATE_KEY_ID,
-    private_key:process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, "\n"),
-    client_email:process.env.FIREBASE_CLIENT_EMAIL,
-    client_id:process.env.FIREBASE_CLIENT_ID,
-    auth_uri:"https://accounts.google.com/o/oauth2/auth",
-    token_uri:"https://oauth2.googleapis.com/token",
-    auth_provider_x509_cert_url:"https://www.googleapis.com/oauth2/v1/certs",
-    client_x509_cert_url:process.env.FIREBASE_CLIENT_CRET_URL,
-    universe_domain:"googleapis.com"
+    type: "service_account",
+    project_id: process.env.FIREBASE_PROJECT_ID,
+    private_key_id: process.env.FIREBASE_PRIVATE_KEY_ID,
+    private_key: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, "\n"),
+    client_email: process.env.FIREBASE_CLIENT_EMAIL,
+    client_id: process.env.FIREBASE_CLIENT_ID,
+    auth_uri: "https://accounts.google.com/o/oauth2/auth",
+    token_uri: "https://oauth2.googleapis.com/token",
+    auth_provider_x509_cert_url: "https://www.googleapis.com/oauth2/v1/certs",
+    client_x509_cert_url: process.env.FIREBASE_CLIENT_CRET_URL,
+    universe_domain: "googleapis.com",
   }),
 });
 
@@ -80,7 +110,7 @@ server.use(express.json());
 server.use(cors());
 
 mongoose
-  .connect(process.env.DB_LOCATION, {
+  .connect(process.env.DB_LOCATION, { 
     autoIndex: true,
   })
   .then(() => {
@@ -90,7 +120,6 @@ mongoose
     console.error("❌ Failed Database connection error:", err);
     throw err;
   });
-
 
 server.post(
   "/upload-file-cloud",
@@ -413,7 +442,7 @@ server.post("/update-profile", verifyJWT, (req, res) => {
       }
     }
   } catch (error) {
-    console.log(error)
+    console.log(error);
     return res
       .status(500)
       .json({ error: "You must provide full links with http(s) included!" });
@@ -432,8 +461,7 @@ server.post("/update-profile", verifyJWT, (req, res) => {
       return res.status(200).json({ username });
     })
     .catch((err) => {
-
-      console.log(err)
+      console.log(err);
       if (err.code == 11000) {
         return res.status(409).json({ error: "username is already taken!" });
       }
@@ -445,8 +473,6 @@ server.post("/update-profile", verifyJWT, (req, res) => {
 server.use("", blogRouter);
 server.use("", usersRouter);
 server.use("", notificationRouter);
-
-
 
 // server.listen(PORT, () => {
 //   console.log("listening on port -> " + PORT);

@@ -15,12 +15,15 @@ export const generateBlogHTML = (title, banner, tags, des, blog_id, publishedAt,
   <meta name="keywords" content="${tags.join(", ")}" />
   <meta name="author" content="${personal_info.fullname}" />
 
+  <!-- Canonical URL -->
+  <link rel="canonical" href="https://blogai-rose.vercel.app/blog/${blog_id}" />
+
   <!-- Open Graph -->
   <meta property="og:type" content="article" />
   <meta property="og:title" content="${title}" />
   <meta property="og:description" content="${des}" />
   <meta property="og:image" content="${banner}" />
-  <meta property="og:url" content="https://yourdomain.com/blog/${
+  <meta property="og:url" content="https://blogai-rose.vercel.app/blog/${
     blog_id
   }" />
 
@@ -44,14 +47,15 @@ export const generateBlogHTML = (title, banner, tags, des, blog_id, publishedAt,
     },
     "publisher": {
       "@type": "Organization",
-      "name": "Your Blog Name",
+      "name": "blogai",
       "logo": {
         "@type": "ImageObject",
-        "url": "https://yourdomain.com/logo.png"
+        "url": "https://res.cloudinary.com/dblftsuim/image/upload/v1756439810/mern_uploads/hviqnxco5ohfardpgflo.png"
       }
     },
-    "datePublished": "${publishedAt}",
-    "dateModified": "${publishedAt}"
+    "datePublished": "${publishedAt.toISOString()}",
+    "dateModified": "${publishedAt.toISOString()}",
+    "url": "https://blogai-rose.vercel.app/blog/${blog_id}"
   }
   </script>
 </head>
@@ -60,7 +64,7 @@ export const generateBlogHTML = (title, banner, tags, des, blog_id, publishedAt,
     <header>
       <h1>${title}</h1>
       <p>By <span>${
-        "blog.author.personal_info.fullname"
+        personal_info.fullname
       }</span> on <time datetime="${publishedAt}">${new Date(publishedAt).toDateString()}</time></p>
       <img src="${banner}" alt="${title}" />
     </header>

@@ -1,6 +1,14 @@
 {
   "rewrites": [
     {
+      "source": "/robots.txt",
+      "destination": "https://blogai-six.vercel.app/robots.txt"
+    },
+    {
+      "source": "/sitemap.xml",
+      "destination": "https://blogai-six.vercel.app/sitemap.xml"
+    },
+    {
       "source": "/blog/:id",
       "has": [
         {
