@@ -3,7 +3,6 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 
 import { Toaster, toast } from "react-hot-toast";
 
-
 import defaultBanner from "../imgs/blog banner.png";
 import defaultBannerDark from "../imgs/blog banner dark.png";
 import tightblogailogopng from "../imgs/tightblogailogopng.png";
@@ -13,8 +12,14 @@ import EditorJS from "@editorjs/editorjs";
 import { EditorContext } from "../pages/editor.pages";
 import { tools } from "./tools.component";
 import { ThemeContext, UserContext } from "../App";
+import KeywordSuggest from "./seo.component";
+import { useState } from "react";
+
+import suggestionlogopng from "../imgs/suggestion.png";
 
 const BlogEditor = () => {
+  const [seoWrapper, setSeoWrapper] = useState(false);
+
   let {
     blog,
     blog: { title, banner, content, tags, des },
@@ -23,11 +28,9 @@ const BlogEditor = () => {
     setTextEditor,
     setEditorState,
   } = useContext(EditorContext);
-  let {
-    theme
-  } = useContext(ThemeContext);
+  let { theme } = useContext(ThemeContext);
 
-  let {blog_id} = useParams();
+  let { blog_id } = useParams();
 
   let {
     userAuth: { access_token },
@@ -35,17 +38,29 @@ const BlogEditor = () => {
   let navigate = useNavigate();
 
   useEffect(() => {
-    if (!textEditor.isReady) {
-      setTextEditor(
-        new EditorJS({
-          holder: "textEditor",
-          data: Array.isArray(content) ? content[0] : content,
-          tools: tools,
-          placeholder: "Let's write your imagination",
-        })
-      );
+    if (textEditor && textEditor?.configuration) {
+      try {
+        textEditor?.destroy();
+      } catch (err) {
+        console.error("Destroy error:", err);
+      }
     }
-  }, []);
+
+    const editor = new EditorJS({
+      holder: "textEditor",
+      data: Array.isArray(content) ? content[0] : content,
+      tools,
+      placeholder: "Let's write your imagination",
+    });
+
+    setTextEditor(editor);
+
+    // return () => {
+    //   if (editor && editor?.destroy) {
+    //     editor.destroy().catch((err) => console.error("Cleanup error:", err));
+    //   }
+    // };
+  }, [content]);
 
   const handleBannerUpload = async (e) => {
     try {
@@ -149,11 +164,15 @@ const BlogEditor = () => {
           draft: true,
         };
         axios
-          .post(import.meta.env.VITE_SERVER_DOMAIN + "/create-blog", {...blogObj, id:blog_id}, {
-            headers: {
-              Authorization: `Bearer ${access_token}`,
-            },
-          })
+          .post(
+            import.meta.env.VITE_SERVER_DOMAIN + "/create-blog",
+            { ...blogObj, id: blog_id },
+            {
+              headers: {
+                Authorization: `Bearer ${access_token}`,
+              },
+            }
+          )
           .then(() => {
             e.target.classList.remove("disable");
             toast.dismiss(loadingToast);
@@ -195,11 +214,17 @@ const BlogEditor = () => {
       <Toaster />
 
       <AnimationWrapper>
-        <section>
+        {/* <div className="flex"> */}
+        <section className="relative">
           <div className="mx-auto max-w-[900px] w-full">
             <div className="relative aspect-video bg-whiteborder-2 border-grey hover:opacity-80">
               <label htmlFor="uploadBanner">
-                <img loading="lazy" src={banner} className="z-20" onError={handleError} />
+                <img
+                  loading="lazy"
+                  src={banner}
+                  className="z-20"
+                  onError={handleError}
+                />
                 <input
                   id="uploadBanner"
                   type="file"
@@ -220,10 +245,25 @@ const BlogEditor = () => {
 
             <hr className="w-full opacity-10 my-5" />
 
-
             <div id="textEditor" className="font-gelasio"></div>
           </div>
+
+          {!seoWrapper ? (
+            <button
+              className="absolute right-4 top-0"
+              onClick={() => setSeoWrapper((prev) => !prev)}
+            >
+              <img src={suggestionlogopng} className="w-8 h-8" />
+            </button>
+          ) : (
+            <KeywordSuggest
+              seoWrapper={seoWrapper}
+              setSeoWrapper={setSeoWrapper}
+            />
+          )}
         </section>
+
+        {/* </div> */}
       </AnimationWrapper>
     </>
   );

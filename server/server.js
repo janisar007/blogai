@@ -15,6 +15,7 @@ import User from "./Schema/User.js";
 import blogRouter from "./Routers/blog.router.js";
 import usersRouter from "./Routers/user.router.js";
 import notificationRouter from "./Routers/notification.router.js";
+import seoRouter from "./Routers/seo.router.js";
 import { verifyJWT } from "./Middlewares/verifyJWT.middleware.js";
 import blogModel from "./Schema/blog.model.js";
 
@@ -473,9 +474,11 @@ server.post("/update-profile", verifyJWT, (req, res) => {
 server.use("", blogRouter);
 server.use("", usersRouter);
 server.use("", notificationRouter);
+server.use("", seoRouter);
 
 // server.listen(PORT, () => {
 //   console.log("listening on port -> " + PORT);
 // });
 
 export default server;
+

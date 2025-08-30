@@ -4,6 +4,7 @@ import User from "../Schema/User.js";
 import Notification from "../Schema/Notification.js";
 import Comment from "../Schema/Comment.js";
 import { generateBlogHTML } from "../utils/staticHtml.js";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
 export const createBlog = async (req, res) => {
   try {
@@ -604,3 +605,5 @@ export const deleteBlog = (req, res) => {
       return res.status(500).json({ error: err.message });
     });
 };
+
+
